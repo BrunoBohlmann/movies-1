@@ -1,66 +1,274 @@
-import React, { useState } from 'react'
-import TMDBImage from './TMDBImage'
-import './MoviesList.css'
+import React, { useState } from "react";
+import TMDBImage from "./TMDBImage";
 
-export default function MoviesList ({ movies }){
+// MUI
+import { makeStyles } from "@mui/styles";
+import {
+  Modal,
+  CardActionArea,
+  Grid,
+  CardContent,
+  Card,
+  CardMedia,
+  Box,
+  Typography,
+  Select,
+  FormControl,
+  MenuItem,
+  InputLabel,
+} from "@mui/material";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import ThumbUpIcon from "@mui/icons-material/ThumbUp";
+import ThumbDownIcon from "@mui/icons-material/ThumbDown";
 
+//MUI Styles
+const useStyles = makeStyles({
+  listTitle: {
+    marginTop: 30,
+    marginLeft: 30,
+    marginBottom: 10,
+  },
+  movieListItemContent: {
+    color: "white",
+    borderBottom: "1px solid white",
+    "&:hover": {
+      color: "red",
+      border: "none",
+    },
+  },
+  modalPoster: {
+    alignSelf: "center",
+    height: 225,
+    width: 450,
+  },
+});
 
-  const [selectedMovie, setSelectedMovie] = useState(null)
-  const [sortingType, setSortingType] = useState('')
-  const handleSelectMovie = movie => setSelectedMovie(movie)
-  const handleSortingChange = event => {
-    setSortingType(event.target.value)
-  }
+export default function MoviesList({ movies }) {
+  console.log(movies);
+  const classes = useStyles();
 
-  return(<div className="movies-list">
-    <div className="items">
-      <div>
-        <span>Sort by:</span>
-        <SortingOptions selectedOption={sortingType} onChange={handleSortingChange}/>
-      </div>
-      {
-        movies.map(movie =>
-          <MovieListItem key={movie.id} movie={movie} isSelected={selectedMovie===movie} onSelect={handleSelectMovie}/>
-        )
-      }
-    </div>
-    {
-      selectedMovie && (
-        <ExpandedMovieItem movie={selectedMovie} />
-      )
-    }
-  </div>)
+  //Movie State
+  const [selectedMovie, setSelectedMovie] = useState(null);
 
-  
-}
+  //Sort State
+  const [sortingType, setSortingType] = useState("");
 
-const ExpandedMovieItem = ({movie: {title, original_title, poster_path, overview, vote_average, vote_count}}) => (
-  <div className="expanded-movie-item">
-    <TMDBImage src={poster_path} className="poster" />
-    <div className="description">
-      <h2>{title}({original_title})</h2>
-      <div><h4>Rank(votes count)</h4>: <span>{vote_average}({vote_count})</span></div>
-      <span>{overview}</span>
-    </div>
-  </div>
-)
+  //Modal State
+  const [open, setOpen] = React.useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
 
-function MovieListItem ({movie, isSelected, onSelect}) {
-  const handleClick = () => onSelect(movie)
-  const { title, vote_average } = movie
-  const className = `movie-list-item ${isSelected ? 'selected' : ''}`
-  return(<div className={className} onClick={handleClick}>{title}({vote_average})</div>)
-}
+  //Movie seleccionada
+  const handleSelectMovie = (movie) => {
+    setSelectedMovie(movie);
+    handleOpen();
+  };
 
-function SortingOptions ({ selectedOption, onChange }) {
+  //Sort change
+  const handleSortingChange = (event) => {
+    setSortingType(event.target.value);
+  };
 
   return (
-    <select value={selectedOption} onChange={onChange}>
-      <option value=""></option>
-      <option value="name_asc">A to Z</option>
-      <option value="name_desc">Z to A</option>
-      <option value="rating">Rating</option>
-    </select>
-  )
+    <Box>
+      {/* Box para separar el modal de la list */}
+      <Box>
+        {/* Sort */}
+        <Box sx={{ maxWidth: 200, margin: 3, color: "white" }}>
+          <Typography
+            variant="subtitle2"
+            color="secondary"
+            sx={{ marginLeft: 2 }}
+          >
+            Sort by:
+          </Typography>
+          <SortingOptions
+            selectedOption={sortingType}
+            onChange={handleSortingChange}
+          />
+        </Box>
+
+        {/* Titulo de lista movies */}
+        <Box className={classes.listTitle}>
+          <Typography variant="h6" component="div">
+            Movies
+          </Typography>
+        </Box>
+
+        {/* Lista de Movies */}
+        <Box>
+          <Grid container spacing={0}>
+            {movies.map((movie) => (
+              <Grid item xs={2}>
+                <MovieListItem
+                  key={movie.id}
+                  movie={movie}
+                  isSelected={selectedMovie === movie}
+                  onSelect={handleSelectMovie}
+                />
+              </Grid>
+            ))}
+          </Grid>
+          <Box>
+            {selectedMovie && (
+              <ExpandedMovieItem
+                movie={selectedMovie}
+                onClose={handleClose}
+                onOpen={open}
+                styles={classes}
+              />
+            )}
+          </Box>
+        </Box>
+      </Box>
+    </Box>
+  );
 }
 
+const ExpandedMovieItem = ({
+  movie: {
+    title,
+    original_title,
+    poster_path,
+    overview,
+    vote_average,
+    vote_count,
+    backdrop_path,
+  },
+  onClose,
+  onOpen,
+}) => {
+  const overviewLimit = (overview, n) =>
+    overview?.length > n ? `${overview.substr(0, n - 1)} ...` : `${overview}`;
+
+  const classes = useStyles();
+
+  function movieModal() {
+    return {
+      color: "white",
+      alignItems: "center",
+      position: "absolute",
+      top: "50%",
+      left: "50%",
+      transform: "translate(-50%, -50%)",
+      width: 600,
+      height: 500,
+      background: "#211E1E",
+      border: "2px solid #000",
+      boxShadow: 24,
+      p: 4,
+    };
+  }
+
+  return (
+    <Box>
+      <Modal
+        open={onOpen}
+        onClose={onClose}
+        style={{ alignItems: "center", justifyContent: "center" }}
+      >
+        <Box sx={movieModal}>
+          {/* Img, title and overview */}
+          <TMDBImage src={backdrop_path} className={classes.modalPoster} />
+          <Typography variant="h6" sx={{ marginTop: 2 }}>
+            {title}
+          </Typography>
+          <Typography sx={{ mt: 2 }}>{overviewLimit(overview, 150)}</Typography>
+
+          {/* Votes */}
+          <Box sx={{ marginTop: 2 }}>
+            <Typography
+              variant="subtitle2"
+              sx={{ display: "inline", marginRight: 1.5 }}
+            >
+              Votes: {vote_count}
+            </Typography>
+            <Typography variant="subtitle2" sx={{ display: "inline" }}>
+              Average: {vote_average}
+            </Typography>
+          </Box>
+          {/* Icons */}
+          <Box sx={{ marginTop: 1.3 }}>
+            <FavoriteIcon sx={{ marginRight: 2 }} />
+            <ThumbUpIcon sx={{ marginRight: 2 }} />
+            <ThumbDownIcon />
+          </Box>
+        </Box>
+      </Modal>
+    </Box>
+  );
+};
+
+{
+}
+{
+  /* <Box>
+<Typography variant="h2" color="initial">
+  {title}({original_title})
+</Typography>
+</Box> */
+}
+
+//   <div>
+//   <h4>Rank(votes count)</h4>:{" "}
+//   <span>
+//     {vote_average}({vote_count})
+//   </span>
+// </div>
+// <span>{overview}</span>
+
+function MovieListItem({ movie, onSelect }) {
+  const classes = useStyles();
+
+  const handleClick = () => onSelect(movie);
+
+  const { title, poster_path, vote_average } = movie;
+
+  return (
+    <Card
+      sx={{
+        maxWidth: 200,
+        margin: "10px",
+        maxHeight: 310,
+        backgroundColor: "transparent",
+      }}
+      className={classes.movieListItem}
+      onClick={handleClick}
+    >
+      <CardActionArea>
+        <CardMedia
+          component="img"
+          height="250"
+          image={`https://image.tmdb.org/t/p/w500/${poster_path}`}
+          alt={title}
+        />
+        <CardContent className={classes.movieListItemContent}>
+          <Typography variant="subtitle2" component="div">
+            {vote_average}
+          </Typography>
+        </CardContent>
+      </CardActionArea>
+    </Card>
+  );
+}
+
+function SortingOptions({ selectedOption, onChange }) {
+  return (
+    <FormControl sx={{ m: 1, minWidth: 200, color: "white" }}>
+      <Select
+        sx={{ backgroundColor: "white" }}
+        value={selectedOption}
+        onChange={onChange}
+        displayEmpty
+        inputProps={{ "aria-label": "Without label" }}
+      >
+        <MenuItem value="">
+          <em>None</em>
+        </MenuItem>
+        <MenuItem value="name_asc">A to Z</MenuItem>
+        <MenuItem value="name_desc">Z to A</MenuItem>
+        <MenuItem value="rating">Rating</MenuItem>
+      </Select>
+    </FormControl>
+  );
+}
