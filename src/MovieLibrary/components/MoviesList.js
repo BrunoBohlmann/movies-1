@@ -43,9 +43,11 @@ const useStyles = makeStyles({
   },
 });
 
-export default function MoviesList({ movies }) {
-  console.log(movies);
+export default function MoviesList({ movies: moviesArray }) {
   const classes = useStyles();
+
+  //MoviesArray
+  const [movies, setMovies] = useState(moviesArray);
 
   //Movie State
   const [selectedMovie, setSelectedMovie] = useState(null);
@@ -67,6 +69,39 @@ export default function MoviesList({ movies }) {
   //Sort change
   const handleSortingChange = (event) => {
     setSortingType(event.target.value);
+    setMovies(moviesSort(movies, event.target.value));
+  };
+
+  //Sort function
+  const moviesSort = (movies, type) => {
+    if (type === "name_asc") {
+      return filterName(movies);
+    } else if (type === "name_desc") {
+      return filterName(movies).reverse();
+    } else if (type === "rating") {
+      return filterRating(movies).reverse();
+    }
+    return movies;
+  };
+
+  //Filter per title
+  const filterName = (movies) => {
+    return movies.sort((a, b) => {
+      if (a.title < b.title) {
+        return -1;
+      }
+      if (a.title > b.title) {
+        return 1;
+      }
+      return 0;
+    });
+  };
+
+  //Filter per rating
+  const filterRating = (movies) => {
+    return movies.sort((a, b) => {
+      return a.vote_average - b.vote_average;
+    });
   };
 
   return (
@@ -85,6 +120,7 @@ export default function MoviesList({ movies }) {
           <SortingOptions
             selectedOption={sortingType}
             onChange={handleSortingChange}
+            moviesArray={movies}
           />
         </Box>
 
@@ -198,24 +234,6 @@ const ExpandedMovieItem = ({
     </Box>
   );
 };
-
-{
-}
-{
-  /* <Box>
-<Typography variant="h2" color="initial">
-  {title}({original_title})
-</Typography>
-</Box> */
-}
-
-//   <div>
-//   <h4>Rank(votes count)</h4>:{" "}
-//   <span>
-//     {vote_average}({vote_count})
-//   </span>
-// </div>
-// <span>{overview}</span>
 
 function MovieListItem({ movie, onSelect }) {
   const classes = useStyles();
