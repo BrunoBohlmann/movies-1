@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import TMDBImage from "./TMDBImage";
 
 // MUI
@@ -15,7 +15,6 @@ import {
   Select,
   FormControl,
   MenuItem,
-  InputLabel,
 } from "@mui/material";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
@@ -43,10 +42,10 @@ const useStyles = makeStyles({
   },
 });
 
-export default function MoviesList({ movies: moviesArray }) {
+export default function MoviesList({ moviesArray }) {
   const classes = useStyles();
 
-  //MoviesArray
+  //MoviesArray state
   const [movies, setMovies] = useState(moviesArray);
 
   //Movie State
@@ -60,7 +59,7 @@ export default function MoviesList({ movies: moviesArray }) {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  //Movie seleccionada
+  //Movie selected
   const handleSelectMovie = (movie) => {
     setSelectedMovie(movie);
     handleOpen();
@@ -105,11 +104,29 @@ export default function MoviesList({ movies: moviesArray }) {
   };
 
   return (
-    <Box>
+    <Box sx={{ paddingBottom: 5 }}>
       {/* Box para separar el modal de la list */}
-      <Box>
-        {/* Sort */}
-        <Box sx={{ maxWidth: 200, margin: 3, color: "white" }}>
+      <Box sx={{ justifyItems: "center" }}>
+        <Box
+          sx={{
+            display: "inline-block",
+            marginRight: 110,
+            marginLeft: 10,
+            marginTop: 4,
+          }}
+        >
+          <Typography variant="h6" component="h2">
+            Movies
+          </Typography>
+        </Box>
+
+        {/* Sort element*/}
+        <Box
+          sx={{
+            display: "inline-block",
+            maxWidth: 200,
+          }}
+        >
           <Typography
             variant="subtitle2"
             color="secondary"
@@ -117,6 +134,7 @@ export default function MoviesList({ movies: moviesArray }) {
           >
             Sort by:
           </Typography>
+
           <SortingOptions
             selectedOption={sortingType}
             onChange={handleSortingChange}
@@ -125,25 +143,23 @@ export default function MoviesList({ movies: moviesArray }) {
         </Box>
 
         {/* Titulo de lista movies */}
-        <Box className={classes.listTitle}>
-          <Typography variant="h6" component="div">
-            Movies
-          </Typography>
-        </Box>
+        <Box className={classes.listTitle}></Box>
 
         {/* Lista de Movies */}
-        <Box>
+        <Box sx={{ marginLeft: 7 }}>
           <Grid container spacing={0}>
-            {movies.map((movie) => (
-              <Grid item xs={2}>
-                <MovieListItem
-                  key={movie.id}
-                  movie={movie}
-                  isSelected={selectedMovie === movie}
-                  onSelect={handleSelectMovie}
-                />
-              </Grid>
-            ))}
+            {movies?.map((movie) => {
+              return (
+                <Grid item xs={2.3}>
+                  <MovieListItem
+                    key={movie.id}
+                    movie={movie}
+                    isSelected={selectedMovie === movie}
+                    onSelect={handleSelectMovie}
+                  />
+                </Grid>
+              );
+            })}
           </Grid>
           <Box>
             {selectedMovie && (
@@ -248,12 +264,13 @@ function MovieListItem({ movie, onSelect }) {
         maxWidth: 200,
         margin: "10px",
         maxHeight: 310,
-        backgroundColor: "transparent",
+        backgroundColor: "#212121",
+        borderRadius: 1,
+        boxShadow: "0px 20px 25px -10px rgba(0,0,0, 1)",
       }}
       className={classes.movieListItem}
-      onClick={handleClick}
     >
-      <CardActionArea>
+      <CardActionArea onClick={handleClick}>
         <CardMedia
           component="img"
           height="250"
@@ -272,9 +289,9 @@ function MovieListItem({ movie, onSelect }) {
 
 function SortingOptions({ selectedOption, onChange }) {
   return (
-    <FormControl sx={{ m: 1, minWidth: 200, color: "white" }}>
+    <FormControl sx={{ m: 1, minWidth: 150, height: 30 }}>
       <Select
-        sx={{ backgroundColor: "white" }}
+        sx={{ backgroundColor: "#212121", color: "white", height: 40 }}
         value={selectedOption}
         onChange={onChange}
         displayEmpty

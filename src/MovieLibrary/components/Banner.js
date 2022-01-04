@@ -8,30 +8,39 @@ import { lightBlue } from "@mui/material/colors";
 
 const useStyles = makeStyles((theme) => ({
   banner: {
+    width: "100%",
+    display: "flex",
+    flexDirection: "column",
     position: "relative",
+    objectFit: "contain",
     height: "100vh",
-    backgroundRepeat: "no-repeat",
-    backgroundSize: "cover",
-    boxShadow: "inset 0 0 0 1000px rgba(0, 0, 0, 0.6)",
   },
   fadeBottom: {
     position: "absolute",
-    top: "40vh",
+    top: 0,
     bottom: 0,
     left: 0,
     right: 0,
     background:
-      "linear-gradient(180deg, transparent, rgba(37, 37, 37, 0.6), #111)",
+      "linear-gradient(180deg, transparent, rgba(33, 33, 33, 0.9), #222)",
   },
   bannerTitle: {
     width: "40%",
-    paddingTop: "4em",
+    paddingTop: "5em",
     paddingLeft: "3em",
+    zIndex: 99,
   },
   bannerOverview: {
     width: "40%",
-    paddingTop: "4em",
+    paddingTop: "2em",
     paddingLeft: "3em",
+    zIndex: 99,
+  },
+  bannerImg: {
+    objectFit: "cover",
+    width: "100%",
+    height: "100vh",
+    position: "absolute",
   },
 }));
 
@@ -53,18 +62,23 @@ const Banner = (props) => {
 
   return (
     <div
-      style={{
-        backgroundImage: `url(https://image.tmdb.org/t/p/w500/${movieBanner.backdrop_path})`,
-      }}
+      // style={{
+      //   backgroundImage: `url(https://image.tmdb.org/t/p/w500/${movieBanner.backdrop_path})`,
+      // }}
       className={classes.banner}
     >
-      <Box className={classes.fadeBottom} />
+      <img
+        src={`https://image.tmdb.org/t/p/w500/${movieBanner.backdrop_path}`}
+        className={classes.bannerImg}
+      />
+
       <Box className={classes.bannerTitle}>
         <Typography variant="h2">{movieBanner.title}</Typography>
       </Box>
       <Box className={classes.bannerOverview}>
         <Typography variant="p">{movieBanner.overview}</Typography>
       </Box>
+      <Box className={classes.fadeBottom} />
     </div>
   );
 };
