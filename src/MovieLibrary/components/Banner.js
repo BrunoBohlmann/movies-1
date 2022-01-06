@@ -1,10 +1,9 @@
 import React, { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchTopRatedMovies } from "../store/actions";
+import { useSelector } from "react-redux";
 import Box from "@mui/material/Box";
 import { makeStyles } from "@mui/styles";
 import Typography from "@mui/material/Typography";
-import { lightBlue } from "@mui/material/colors";
+import { getMovies } from "../store/selectors";
 
 const useStyles = makeStyles((theme) => ({
   banner: {
@@ -44,29 +43,18 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Banner = (props) => {
-  const dispatch = useDispatch();
-  const classes = useStyles(props);
-
-  useEffect(() => {
-    dispatch(fetchTopRatedMovies());
-  }, []);
+const Banner = () => {
+  const classes = useStyles();
+  const movies = useSelector(getMovies);
 
   //Numero aleatorio para banner
   function getRandomArbitrary(min, max) {
     return Math.floor(Math.random() * (max - min) + min);
   }
-  const movieBanner = useSelector(
-    (state) => state.movies[getRandomArbitrary(1, 19)]
-  );
+  const movieBanner = movies[getRandomArbitrary(1, 19)];
 
   return (
-    <div
-      // style={{
-      //   backgroundImage: `url(https://image.tmdb.org/t/p/w500/${movieBanner.backdrop_path})`,
-      // }}
-      className={classes.banner}
-    >
+    <div className={classes.banner}>
       <img
         src={`https://image.tmdb.org/t/p/w500/${movieBanner.backdrop_path}`}
         className={classes.bannerImg}

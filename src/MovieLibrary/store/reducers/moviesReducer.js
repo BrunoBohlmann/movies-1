@@ -6,7 +6,7 @@ export default function (state = initialState, action) {
   const { type, payload } = action;
   switch (type) {
     case LOAD_MOVIES:
-      return [...state, ...payload];
+      return [...new Set([...state, ...payload])];
 
     default:
       return state;

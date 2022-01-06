@@ -42,7 +42,7 @@ const useStyles = makeStyles({
   },
 });
 
-export default function MoviesList({ moviesArray }) {
+export default function MoviesList({ moviesArray, lastElementRef }) {
   const classes = useStyles();
 
   //MoviesArray state
@@ -148,17 +148,30 @@ export default function MoviesList({ moviesArray }) {
         {/* Lista de Movies */}
         <Box sx={{ marginLeft: 7 }}>
           <Grid container spacing={0}>
-            {movies?.map((movie) => {
-              return (
-                <Grid item xs={2.3}>
-                  <MovieListItem
-                    key={movie.id}
-                    movie={movie}
-                    isSelected={selectedMovie === movie}
-                    onSelect={handleSelectMovie}
-                  />
-                </Grid>
-              );
+            {movies?.map((movie, index) => {
+              if (movies.length - 1 === index) {
+                return (
+                  <Grid item xs={2.3} ref={lastElementRef}>
+                    <MovieListItem
+                      key={movie.id}
+                      movie={movie}
+                      isSelected={selectedMovie === movie}
+                      onSelect={handleSelectMovie}
+                    />
+                  </Grid>
+                );
+              } else {
+                return (
+                  <Grid item xs={2.3}>
+                    <MovieListItem
+                      key={movie.id}
+                      movie={movie}
+                      isSelected={selectedMovie === movie}
+                      onSelect={handleSelectMovie}
+                    />
+                  </Grid>
+                );
+              }
             })}
           </Grid>
           <Box>

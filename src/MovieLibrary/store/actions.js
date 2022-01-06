@@ -9,7 +9,6 @@ export function fetchTopRatedMovies(pageNumber) {
     const json = await axios.get(
       `https://api.themoviedb.org/3/movie/popular?api_key=${apikey}&page=${pageNumber}`
     );
-    console.log("llego");
 
     return dispatch({
       type: LOAD_MOVIES,

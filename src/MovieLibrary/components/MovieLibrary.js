@@ -1,10 +1,17 @@
-import React, { useEffect, Suspense, lazy, useState, useRef } from "react";
+import React, {
+  useEffect,
+  Suspense,
+  lazy,
+  useState,
+  useRef,
+  useCallback,
+} from "react";
 import NavBar from "./NavBar";
 import { makeStyles } from "@mui/styles";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchTopRatedMovies } from "../store/actions";
 import { getMovies } from "../store/selectors";
-const Banner = lazy(() => import("./Banner"));
+import Banner from "./Banner";
 import MoviesList from "./MoviesList";
 
 const useStyles = makeStyles((theme) => ({
@@ -15,79 +22,61 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+const totalPages = 1000;
+
 export default function MovieLibrary() {
   const dispatch = useDispatch();
   const classes = useStyles();
-  const totalPages = 1000;
+
   const moviesArray = useSelector(getMovies);
 
   const [loading, setLoading] = useState(true);
-  const [allMovies, setAllMovies] = useState(moviesArray);
+  const [allMovies, setAllMovies] = useState([]);
   const [pageNum, setPageNum] = useState(1);
-  const [lastElement, setLastElement] = useState(null);
 
-  const observer = useRef(
-    new IntersectionObserver((entries) => {
-      const first = entries[0];
-      if (first.isIntersecting) {
-        setPageNum((no) => no + 1);
-      }
-    })
-  );
-
-  //UseEffect de inicio
-  useEffect(() => {
-    dispatch(fetchTopRatedMovies(pageNum));
-  }, [dispatch]);
-
-  //UseEffect de infinitScroll
-  useEffect(() => {
-    if (pageNum <= totalPages) {
-      callMovies();
-    }
-    // }
-  }, [pageNum]);
-
-  //UseEffect de inicio
-  useEffect(() => {
+  const callMovies = async (num) => {
     setLoading(true);
-    setAllMovies(moviesArray);
-    setLoading(false);
-  }, [moviesArray]);
-
-  const callMovies = async () => {
-    setLoading(true);
-    await dispatch(fetchTopRatedMovies(pageNum));
+    console.log(num);
+    await dispatch(fetchTopRatedMovies(num));
     setLoading(false);
   };
 
   useEffect(() => {
-    const currentElement = lastElement;
-    const currentObserver = observer.current;
+    setAllMovies(moviesArray);
+  }, [moviesArray]);
 
-    if (currentElement) {
-      currentObserver.observe(currentElement);
+  useEffect(() => {
+    if (pageNum <= totalPages) {
+      callMovies(pageNum);
     }
+  }, [pageNum]);
 
-    return () => {
-      if (currentElement) {
-        currentObserver.unobserve(currentElement);
-      }
-    };
-  }, [lastElement]);
+  const observer = useRef();
+  const lastElementRef = useCallback(
+    (node) => {
+      if (loading) return;
+      if (observer.current) observer.current.disconnect();
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting) {
+          console.log("observando");
+          setPageNum((no) => no + 1);
+        }
+      });
+      if (node) observer.current.observe(node);
+    },
+    [loading]
+  );
 
   return (
     <div className={classes.root}>
       <NavBar />
-      <Suspense fallback={<h2>Loading</h2>}>
-        <Banner />
-      </Suspense>
+      {moviesArray.length && <Banner />}
       {!loading && allMovies.length && (
         <div>
-          <MoviesList moviesArray={allMovies} />
+          <MoviesList moviesArray={allMovies} lastElementRef={lastElementRef} />
         </div>
       )}
-      <div ref={setLastElement}></div>
+      {loading && <p>Loading</p>}
     </div>
   );
 }
